@@ -3,9 +3,8 @@
 import os
 
 from setuptools.command.install import install
-
-from setuptools import setup
-
+from setuptools import setup, Extension
+from glob import glob
 
 with open('README.rst') as f:
     LONG_DESCRIPTION = f.read()
@@ -25,6 +24,19 @@ class MakeCommand(install):
         install.run(self)
 
 
+util = Extension(
+    'tgrocery.learner.util',
+    ['tgrocery/learner/util.c'],
+    include_dirs=['tgrocery/learner/liblinear']
+)
+
+liblinear = Extension(
+    'tgrocery.learner.liblinear.liblinear',
+    glob('tgrocery/learner/liblinear/*.cpp'),
+    depends=[glob('tgrocery/learner/liblinear/*.h')],
+    library_dirs=['tgrocery/learner/liblinear/blas']
+)
+
 setup(
     name='tgrocery',
     version='0.1.3',
@@ -37,5 +49,5 @@ setup(
     long_description=LONG_DESCRIPTION,
     install_requires=['jieba'],
     keywords='text classification svm liblinear libshorttext',
-    cmdclass={'install': MakeCommand}
+    ext_modules=[util, liblinear]
 )
